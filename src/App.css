@@ -28,7 +28,7 @@
 .board {
   position: relative;
   background: #1e1e1e;
-  border: 2px solid #646cff;
+  border: 5px solid #ff64c6;
   overflow: hidden;
 }
 
@@ -36,7 +36,7 @@
   position: absolute;
   border: none;
   border-radius: 50%;
-  background: #ff4757;
+  background: #e43f8c;
   cursor: pointer;
 }
 
@@ -60,6 +60,7 @@
 }
 
 .info {
+  font-family: 'Nunito', sans-serif;
   color: #222;
   min-width: 150px;
   text-align: left;
