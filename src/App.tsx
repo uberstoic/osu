@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './App.css';
 
 type GameState = 'idle' | 'running' | 'finished';
 
 const BOARD_SIZE = 400;
 const TARGET_SIZE = 40;
+const ROUND_DURATION = 30;
 const STORAGE_KEY = 'osu_clicker_scores';
 
 function getTopScores(): number[] {
@@ -27,69 +28,60 @@ function saveScore(score: number) {
 export default function App() {
   const [gameState, setGameState] = useState<GameState>('idle');
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [targetLifetime, setTargetLifetime] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(ROUND_DURATION);
   const [targetPos, setTargetPos] = useState({ x: 0, y: 0 });
   const [topScores, setTopScores] = useState<number[]>(getTopScores());
-  const timerRef = useRef<number | null>(null);
 
   const moveTarget = useCallback(() => {
-    // Random lifetime from 1 to 2 seconds
-    const newLifetime = Math.random() * 1 + 1;
-    setTargetLifetime(newLifetime);
-    setTimeLeft(newLifetime);
-
     const x = Math.random() * (BOARD_SIZE - TARGET_SIZE);
     const y = Math.random() * (BOARD_SIZE - TARGET_SIZE);
     setTargetPos({ x, y });
   }, []);
 
-  const endGame = useCallback(() => {
-    setGameState('finished');
-    if (timerRef.current) window.clearInterval(timerRef.current);
-    setTopScores(saveScore(score));
-  }, [score]);
-
   const startGame = () => {
     setScore(0);
-    moveTarget();
+    setTimeLeft(ROUND_DURATION);
     setGameState('running');
+    moveTarget();
   };
 
   useEffect(() => {
-    if (gameState !== 'running') return;
+    if (gameState !== 'running') {
+      return;
+    }
 
-    timerRef.current = window.setInterval(() => {
+    const intervalId = window.setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 0.1) {
-          endGame();
+        if (prev <= 1) {
+          setGameState('finished');
+          clearInterval(intervalId);
           return 0;
         }
-        return prev - 0.1;
+        return prev - 1;
       });
-    }, 100);
+    }, 1000);
 
     return () => {
-      if (timerRef.current) window.clearInterval(timerRef.current);
+      clearInterval(intervalId);
     };
-  }, [gameState, endGame]);
+  }, [gameState]);
+
+  useEffect(() => {
+    if (gameState === 'finished') {
+      setTopScores(saveScore(score));
+    }
+  }, [gameState, score]);
 
   const handleTargetClick = () => {
-    // Score only if clicked within the last second
-    if (timeLeft <= 1 && timeLeft > 0) {
-      setScore((s) => s + 1);
-      moveTarget();
-    } else {
-      // Optional: Add a penalty or visual feedback for clicking too early
-      console.log('Too early!');
-    }
+    setScore((s) => s + 1);
+    moveTarget();
   };
 
   return (
     <div className="container">
       <div className="game-wrapper">
         <div className="info">
-          <p>Time: {timeLeft.toFixed(2)}</p>
+          <p>Time: {timeLeft}</p>
           <p>Score: {score}</p>
 
           <h3>Top 5</h3>
@@ -118,9 +110,9 @@ export default function App() {
                 onClick={handleTargetClick}
               >
                 <div
-                  key={targetLifetime} // Reset animation on new target
+                  key={score} // Reset animation on new target
                   className="approach-circle"
-                  style={{ animationDuration: `${targetLifetime}s` }}
+                  style={{ animationDuration: `1s` }}
                 />
               </button>
             )}
