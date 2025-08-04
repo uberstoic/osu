@@ -75,7 +75,7 @@ export default function App() {
     };
   }, [gameState, endGame]);
 
-    const handleTargetClick = () => {
+  const handleTargetClick = () => {
     setScore((s) => s + 1);
     setTimeLeft(TIME_PER_TARGET);
     moveTarget();
@@ -86,30 +86,33 @@ export default function App() {
       <div className="game-wrapper">
         <div className="game-column">
           <h1>osu! Clicker</h1>
-          <div className="board" style={{ width: BOARD_SIZE, height: BOARD_SIZE }}>
-          {gameState === 'running' && (
-            <button
-              className="target"
-              style={{
-                left: targetPos.x,
-                top: targetPos.y,
-                width: TARGET_SIZE,
-                height: TARGET_SIZE,
-              }}
-              onClick={handleTargetClick}
-            />
-          )}
-          {gameState === 'idle' && (
-            <button className="start-btn" onClick={startGame}>
-              Start
-            </button>
-          )}
-          {gameState === 'finished' && (
-            <div className="result">
-              <p>Your score: {score}</p>
-              <button onClick={startGame}>Play again</button>
-            </div>
-          )}
+          <div
+            className="board"
+            style={{ width: BOARD_SIZE, height: BOARD_SIZE }}
+          >
+            {gameState === 'running' && (
+              <button
+                className="target"
+                style={{
+                  left: targetPos.x,
+                  top: targetPos.y,
+                  width: TARGET_SIZE,
+                  height: TARGET_SIZE,
+                }}
+                onClick={handleTargetClick}
+              />
+            )}
+            {gameState === 'idle' && (
+              <button className="start-btn" onClick={startGame}>
+                Start
+              </button>
+            )}
+            {gameState === 'finished' && (
+              <div className="result">
+                <p>Your score: {score}</p>
+                <button onClick={startGame}>Play again</button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -128,4 +131,3 @@ export default function App() {
     </div>
   );
 }
-
