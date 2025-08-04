@@ -34,8 +34,8 @@ export default function App() {
   const timerRef = useRef<number | null>(null);
 
   const moveTarget = useCallback(() => {
-    // Random lifetime from 2 to 4 seconds
-    const newLifetime = Math.random() * 2 + 2;
+    // Random lifetime from 1 to 2 seconds
+    const newLifetime = Math.random() * 1 + 1;
     setTargetLifetime(newLifetime);
     setTimeLeft(newLifetime);
 
@@ -88,6 +88,18 @@ export default function App() {
   return (
     <div className="container">
       <div className="game-wrapper">
+        <div className="info">
+          <p>Time: {timeLeft.toFixed(2)}</p>
+          <p>Score: {score}</p>
+
+          <h3>Top 5</h3>
+          <ol>
+            {topScores.map((s, i) => (
+              <li key={i}>{s}</li>
+            ))}
+          </ol>
+        </div>
+
         <div className="game-column">
           <h1>osu! Clicker</h1>
           <div
@@ -124,18 +136,6 @@ export default function App() {
               </div>
             )}
           </div>
-        </div>
-
-        <div className="info">
-          <p>Time: {timeLeft.toFixed(2)}</p>
-          <p>Score: {score}</p>
-
-          <h3>Top 5</h3>
-          <ol>
-            {topScores.map((s, i) => (
-              <li key={i}>{s}</li>
-            ))}
-          </ol>
         </div>
       </div>
     </div>

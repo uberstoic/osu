@@ -1,7 +1,7 @@
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
-  font-weight: 400;
+  font-weight: 1000;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
@@ -25,8 +25,9 @@ a:hover {
 body {
   margin: 0;
   display: flex;
-  place-items: center;
-  min-width: 320px;
+  justify-content: flex-start;
+  padding-left: 20%;
+  align-items: center;
   min-height: 100vh;
   background-image: url('/umaru.png');
   background-size: cover;
@@ -60,7 +61,7 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
+    color: #ffffff;
     background-color: #ffffff;
   }
   a:hover {
