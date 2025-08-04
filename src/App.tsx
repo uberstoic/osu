@@ -3,7 +3,6 @@ import './App.css';
 
 type GameState = 'idle' | 'running' | 'finished';
 
-const TIME_PER_TARGET = 2; // seconds
 const BOARD_SIZE = 400;
 const TARGET_SIZE = 40;
 const STORAGE_KEY = 'osu_clicker_scores';
@@ -27,22 +26,23 @@ function saveScore(score: number) {
 
 export default function App() {
   const [gameState, setGameState] = useState<GameState>('idle');
-  const [timeLeft, setTimeLeft] = useState(TIME_PER_TARGET);
   const [score, setScore] = useState(0);
-  const [topScores, setTopScores] = useState<number[]>(getTopScores());
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [targetLifetime, setTargetLifetime] = useState(0);
   const [targetPos, setTargetPos] = useState({ x: 0, y: 0 });
+  const [topScores, setTopScores] = useState<number[]>(getTopScores());
   const timerRef = useRef<number | null>(null);
 
-  const randomPos = useCallback(() => {
-    return {
-      x: Math.random() * (BOARD_SIZE - TARGET_SIZE),
-      y: Math.random() * (BOARD_SIZE - TARGET_SIZE),
-    };
-  }, []);
-
   const moveTarget = useCallback(() => {
-    setTargetPos(randomPos());
-  }, [randomPos]);
+    // Random lifetime from 2 to 4 seconds
+    const newLifetime = Math.random() * 2 + 2;
+    setTargetLifetime(newLifetime);
+    setTimeLeft(newLifetime);
+
+    const x = Math.random() * (BOARD_SIZE - TARGET_SIZE);
+    const y = Math.random() * (BOARD_SIZE - TARGET_SIZE);
+    setTargetPos({ x, y });
+  }, []);
 
   const endGame = useCallback(() => {
     setGameState('finished');
@@ -52,9 +52,8 @@ export default function App() {
 
   const startGame = () => {
     setScore(0);
-    setTimeLeft(TIME_PER_TARGET);
-    setGameState('running');
     moveTarget();
+    setGameState('running');
   };
 
   useEffect(() => {
@@ -62,13 +61,13 @@ export default function App() {
 
     timerRef.current = window.setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev === 1) {
+        if (prev <= 0.1) {
           endGame();
           return 0;
         }
-        return prev - 1;
+        return prev - 0.1;
       });
-    }, 1000);
+    }, 100);
 
     return () => {
       if (timerRef.current) window.clearInterval(timerRef.current);
@@ -76,9 +75,14 @@ export default function App() {
   }, [gameState, endGame]);
 
   const handleTargetClick = () => {
-    setScore((s) => s + 1);
-    setTimeLeft(TIME_PER_TARGET);
-    moveTarget();
+    // Score only if clicked within the last second
+    if (timeLeft <= 1 && timeLeft > 0) {
+      setScore((s) => s + 1);
+      moveTarget();
+    } else {
+      // Optional: Add a penalty or visual feedback for clicking too early
+      console.log('Too early!');
+    }
   };
 
   return (
@@ -100,7 +104,13 @@ export default function App() {
                   height: TARGET_SIZE,
                 }}
                 onClick={handleTargetClick}
-              />
+              >
+                <div
+                  key={targetLifetime} // Reset animation on new target
+                  className="approach-circle"
+                  style={{ animationDuration: `${targetLifetime}s` }}
+                />
+              </button>
             )}
             {gameState === 'idle' && (
               <button className="start-btn" onClick={startGame}>
@@ -117,7 +127,7 @@ export default function App() {
         </div>
 
         <div className="info">
-          <p>Time: {timeLeft}</p>
+          <p>Time: {timeLeft.toFixed(2)}</p>
           <p>Score: {score}</p>
 
           <h3>Top 5</h3>
